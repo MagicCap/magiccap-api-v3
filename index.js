@@ -5,6 +5,7 @@
     Sentry.init({
         dsn: process.env.SENTRY_DSN,
     })
+    app.use(Sentry.Handlers.errorHandler())
 
     await require("./rethink_connection").connect()
     require("./routes")
