@@ -43,7 +43,14 @@ class VersionCacher {
         let watching = false
         const betaSince = []
         const stableSince = []
+        let versionsSorted = []
         for (const r of this.versions) {
+            versionsSorted.push(r)
+        }
+        versionsSorted = versionsSorted.sort((a, b) => {
+            return a.release_id - b.release_id
+        })
+        for (const r of versionsSorted) {
             if (watching) {
                 if (r.beta) {
                     if (beta) betaSince.push(r)

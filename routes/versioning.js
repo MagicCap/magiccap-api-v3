@@ -51,6 +51,13 @@ app.get("/version/check/:version", (req, res) => {
 
     const { betaSince, stableSince, latest } = versionsSince
 
+    if (stableSince.length === 0 && betaSince.length === 0) {
+        res.json({
+            success: true,
+            updated: true,
+        })
+    }
+
     if (stableSince.length === 0 && latest.beta && beta) {
         // Drop everything! This is a stable > beta update.
         res.json({
@@ -66,13 +73,6 @@ app.get("/version/check/:version", (req, res) => {
             changelogs: latest.changelogs + "\n",
         })
         return
-    }
-
-    if (stableSince.length === 0 && betaSince.length === 0) {
-        res.json({
-            success: true,
-            updated: true,
-        })
     }
 
     let changelogs = ""
