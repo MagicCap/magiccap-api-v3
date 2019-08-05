@@ -1,5 +1,8 @@
 (async() => {
     const { app } = require("./app")
+    const cors = require("cors")
+
+    app.use(cors())
 
     const Sentry = require("@sentry/node")
     Sentry.init({
