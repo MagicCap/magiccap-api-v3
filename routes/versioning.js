@@ -1,6 +1,5 @@
 const { app } = require("../app")
 const versionCacher = require("../version_cacher")
-const r = require("rethinkdb")
 
 // Gets the latest version.
 app.get("/version/latest", (_, res) => {
