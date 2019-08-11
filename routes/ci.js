@@ -1,5 +1,4 @@
-const { conn } = require("../rethink_connection")
-const r = require("rethinkdb")
+const r = require("../rethink_connection")
 const { app } = require("../app")
 const fetch = require("node-fetch")
 
@@ -8,13 +7,13 @@ app.get("/ci/new/:ciKey/:tag", async (req, res) => {
     const ciKey = req.params.ciKey
     let tag = req.params.tag
     res.contentType("text/plain")
-    if (!await r.table("ci_keys").get(ciKey).run(conn)) {
+    if (!await r.table("ci_keys").get(ciKey).run()) {
         res.send("API key is invalid.")
         res.status(403)
         return
     }
     if (tag.startsWith("v")) tag = tag.substr(1)
-    const versionCount = await r.table("versions").count().run(conn)
+    const versionCount = await r.table("versions").count().run()
     const githubApi = await fetch(
         `https://api.github.com/repos/MagicCap/MagicCap/releases/tags/v${tag}`
     )
@@ -27,6 +26,6 @@ app.get("/ci/new/:ciKey/:tag", async (req, res) => {
         id: tag,
         changelogs: j.body,
         beta: tag.includes("b"),
-    }).run(conn)
+    }).run()
     res.send(`Release ${tag} successfully saved to the database.`)
 })

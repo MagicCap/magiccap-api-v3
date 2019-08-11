@@ -1,12 +1,11 @@
 const { app } = require("../app")
-const { conn } = require("../rethink_connection")
-const r = require("rethinkdb")
+const r = require("../rethink_connection")
 const uuid4 = require("uuid/v4")
 
 // Creates a swap token.
 app.get("/swap_tokens/create/:uploader", async (req, res) => {
     const uploader = req.params.uploader
-    const uploaderDb = await r.table("private_tokens").get(uploader).run(conn)
+    const uploaderDb = await r.table("private_tokens").get(uploader).run()
     if (uploaderDb) {
         const swapToken = uuid4()
         const clientToken = uuid4()
@@ -16,7 +15,7 @@ app.get("/swap_tokens/create/:uploader", async (req, res) => {
             client_token: clientToken,
             expires,
             uploader,
-        }).run(conn)
+        }).run()
         res.json({
             success: true,
             swap_token: swapToken,
@@ -37,7 +36,7 @@ app.get("/swap_tokens/swap/:swap/:private/:uploader", async (req, res) => {
     const swap = req.params.swap
     const private = req.params.private
     const uploader = req.params.uploader
-    const uploaderDb = await r.table("private_tokens").get(uploader).run(conn)
+    const uploaderDb = await r.table("private_tokens").get(uploader).run()
     if (!uploaderDb) {
         res.status(400)
         res.json({
@@ -54,7 +53,7 @@ app.get("/swap_tokens/swap/:swap/:private/:uploader", async (req, res) => {
         })
         return
     }
-    const swapDb = await r.table("swap_tokens").get(swap).run(conn)
+    const swapDb = await r.table("swap_tokens").get(swap).run()
     if (!swapDb) {
         res.status(400)
         res.json({
@@ -86,6 +85,6 @@ app.get("/swap_tokens/swap/:swap/:private/:uploader", async (req, res) => {
             expires: swapDb.expires,
         })
     } finally {
-        await r.table("swap_tokens").get(swap).delete().run(conn)
+        await r.table("swap_tokens").get(swap).delete().run()
     }
 })

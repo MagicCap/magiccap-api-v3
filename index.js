@@ -10,7 +10,6 @@
     })
     app.use(Sentry.Handlers.errorHandler())
 
-    await require("./rethink_connection").connect()
     require("./routes")
 
     app.listen(8000, "0.0.0.0", () => console.log("Listening on port 8000."))

@@ -1,5 +1,4 @@
-const { conn } = require("../rethink_connection")
-const r = require("rethinkdb")
+const r = require("../rethink_connection")
 const { app } = require("../app")
 const uuidv4 = require("uuid/v4")
 const crypto = require("crypto")
@@ -8,7 +7,7 @@ const crypto = require("crypto")
 app.get("/install_id/new/:deviceId", async (req, res) => {
     const deviceId = req.params.deviceId
     let record
-    const deviceLookup = await r.table("installs").getAll(deviceId, {index: "device_id"}).coerceTo("array").run(conn)
+    const deviceLookup = await r.table("installs").getAll(deviceId, {index: "device_id"}).coerceTo("array").run()
     if (deviceLookup.length === 0) {
         const ip = req.ip
         const hash = crypto.createHash("sha256").update(ip, "utf8").digest("hex").toString()
@@ -17,7 +16,7 @@ app.get("/install_id/new/:deviceId", async (req, res) => {
             device_id: deviceId,
             ip_last_5: hash.substr(hash.length - 5),
         }
-        await r.table("installs").insert(record).run(conn)
+        await r.table("installs").insert(record).run()
     } else {
         record = deviceLookup[0]
     }
@@ -27,7 +26,7 @@ app.get("/install_id/new/:deviceId", async (req, res) => {
 
 // Validates a install ID.
 app.get("/install_id/validate/:installId", async (req, res) => {
-    const install = await r.table("installs").get(req.params.installId).run(conn)
+    const install = await r.table("installs").get(req.params.installId).run()
     if (!install) {
         res.json({
             exists: false,

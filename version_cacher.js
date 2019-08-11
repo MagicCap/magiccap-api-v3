@@ -1,5 +1,4 @@
-const { conn } = require("./rethink_connection")
-const r = require("rethinkdb")
+const r = require("./rethink_connection")
 
 class VersionCacher {
     constructor() {
@@ -7,7 +6,7 @@ class VersionCacher {
         this.update()
     }
     async update() {
-        let all = await r.table("versions").coerceTo("array").run(conn)
+        let all = await r.table("versions").coerceTo("array").run()
         all = all.sort((a, b) => {
             return b.release_id - a.release_id
         })
