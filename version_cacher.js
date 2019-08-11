@@ -11,7 +11,7 @@ class VersionCacher {
             return b.release_id - a.release_id
         })
         this.versions = all
-        r.table("versions").changes().run(conn, (err, cursor) => {
+        r.table("versions").changes().run((err, cursor) => {
             if (err) {
                 console.error(err)
                 process.exit(1)
