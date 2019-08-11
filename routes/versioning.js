@@ -37,6 +37,7 @@ app.get("/version/check/:version", (req, res) => {
             success: false,
             error: "Version was solely v.",
         })
+        return
     }
     const beta = req.query.beta && req.query.beta.toLowerCase() === "true"
     const versionsSince = versionCacher.versionsSince(version, beta)
