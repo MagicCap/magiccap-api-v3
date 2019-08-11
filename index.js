@@ -8,6 +8,7 @@
     Sentry.init({
         dsn: process.env.SENTRY_DSN,
     })
+    app.use(Sentry.Handlers.requestHandler())
     app.use(Sentry.Handlers.errorHandler())
 
     require("./routes")
