@@ -28,10 +28,10 @@ app.get("/install_id/new/:deviceId", async (req, res) => {
 app.get("/install_id/validate/:installId", async (req, res) => {
     const install = await r.table("installs").get(req.params.installId).run()
     if (!install) {
+        res.status(400)
         res.json({
             exists: false,
         })
-        res.status(400)
         return
     }
     res.json({

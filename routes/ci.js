@@ -8,8 +8,8 @@ app.get("/ci/new/:ciKey/:tag", async (req, res) => {
     let tag = req.params.tag
     res.contentType("text/plain")
     if (!await r.table("ci_keys").get(ciKey).run()) {
-        res.send("API key is invalid.")
         res.status(403)
+        res.send("API key is invalid.")
         return
     }
     if (tag.startsWith("v")) tag = tag.substr(1)

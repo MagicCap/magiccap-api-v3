@@ -32,20 +32,20 @@ app.get("/version/check/:version", (req, res) => {
     let version = req.params.version
     if (version.startsWith("v")) version = version.substr(1)
     if (version === "") {
+        res.status(400)
         res.json({
             success: false,
             error: "Version was solely v.",
         })
-        res.status(400)
     }
     const beta = req.query.beta && req.query.beta.toLowerCase() === "true"
     const versionsSince = versionCacher.versionsSince(version, beta)
     if (!versionsSince) {
+        res.status(400)
         res.json({
             success: false,
             error: "Version does not exist in the database.",
         })
-        res.status(400)
     }
 
     const { betaSince, stableSince, latest } = versionsSince
