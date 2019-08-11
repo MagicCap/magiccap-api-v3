@@ -6,7 +6,6 @@ const fetch = require("node-fetch")
 app.get("/ci/new/:ciKey/:tag", async (req, res) => {
     const ciKey = req.params.ciKey
     let tag = req.params.tag
-    res.contentType("text/plain")
     if (!await r.table("ci_keys").get(ciKey).run()) {
         res.status(403)
         res.send("API key is invalid.")

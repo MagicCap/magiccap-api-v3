@@ -46,6 +46,7 @@ app.get("/version/check/:version", (req, res) => {
             success: false,
             error: "Version does not exist in the database.",
         })
+        return
     }
 
     const { betaSince, stableSince, latest } = versionsSince
@@ -55,6 +56,7 @@ app.get("/version/check/:version", (req, res) => {
             success: true,
             updated: true,
         })
+        return
     }
 
     if (stableSince.length === 0 && latest.beta && beta) {
