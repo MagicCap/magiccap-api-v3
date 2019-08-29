@@ -1,8 +1,9 @@
 const { app } = require("../app")
 const versionCacher = require("../version_cacher")
+const r = require("../rethink_connection")
 
 // Gets the latest version.
-app.get("/version/latest", (_, res) => {
+const getLatest = () => {
     const latest = versionCacher.getLatest()
     const latestRelease = latest.stable
     const latestBeta = latest.beta
@@ -15,7 +16,7 @@ app.get("/version/latest", (_, res) => {
     }
     betaNewer = latestBeta['release_id'] > latestRelease['release_id']
 
-    res.json({
+    return {
         beta: betaJson,
         release: {
             mac: `https://s3.magiccap.me/upgrades/v${latestRelease.id}/magiccap-mac.dmg`,
@@ -24,11 +25,14 @@ app.get("/version/latest", (_, res) => {
             version: latestRelease.id,
         },
         is_beta_newer_than_release: betaNewer,
-    })
-})
+    }
+}
+
+// Gets the latest version.
+app.get("/version/latest", (_, res) => res.json(getLatest()))
 
 // Gets versions since your release.
-app.get("/version/check/:version", (req, res) => {
+app.get("/version/check/:version", async (req, res) => {
     let version = req.params.version
     if (version.startsWith("v")) version = version.substr(1)
     if (version === "") {
@@ -40,8 +44,8 @@ app.get("/version/check/:version", (req, res) => {
         return
     }
     const beta = req.query.beta && req.query.beta.toLowerCase() === "true"
-    const versionsSince = versionCacher.versionsSince(version, beta)
-    if (!versionsSince) {
+    const versionDb = await r.table("versions").get(version).run()
+    if (!versionDb) {
         res.status(400)
         res.json({
             success: false,
@@ -50,9 +54,15 @@ app.get("/version/check/:version", (req, res) => {
         return
     }
 
-    const { betaSince, stableSince, latest } = versionsSince
+    const latestInfo = getLatest()
+    let latest = latestInfo.release
+    if (latestInfo.is_beta_newer_than_release && beta) {
+        latest = latestInfo.beta
+    }
 
-    if (stableSince.length === 0 && betaSince.length === 0) {
+    const cmp = await r.table("versions").get(latest.version).run()
+
+    if (versionDb.release_id >= cmp.release_id) {
         res.json({
             success: true,
             updated: true,
@@ -60,37 +70,16 @@ app.get("/version/check/:version", (req, res) => {
         return
     }
 
-    if (stableSince.length === 0 && latest.beta && beta) {
-        // Drop everything! This is a stable > beta update.
-        res.json({
-            success: true,
-            updated: false,
-            latest: {
-                version: latest.id,
-                zip_paths: {
-                    mac: `https://s3.magiccap.me/upgrades/v${latest.id}/magiccap-mac.zip`,
-                    linux: `https://s3.magiccap.me/upgrades/v${latest.id}/magiccap-linux.zip`,
-                },
-            },
-            changelogs: latest.changelogs + "\n",
-        })
-        return
-    }
-
-    let changelogs = ""
-    for (const stable of stableSince) changelogs += `${stable.changelogs}\n`
-    for (const b of betaSince) changelogs += `${b.changelogs}\n`
-
     res.json({
         success: true,
         updated: false,
         latest: {
-            version: latest.id,
+            version: cmp.id,
             zip_paths: {
-                mac: `https://s3.magiccap.me/upgrades/v${latest.id}/magiccap-mac.zip`,
-                linux: `https://s3.magiccap.me/upgrades/v${latest.id}/magiccap-linux.zip`,
+                mac: `https://s3.magiccap.me/upgrades/v${cmp.id}/magiccap-mac.zip`,
+                linux: `https://s3.magiccap.me/upgrades/v${cmp.id}/magiccap-linux.zip`,
             },
         },
-        changelogs,
+        changelogs: latest.changelogs,
     })
 })

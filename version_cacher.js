@@ -38,31 +38,6 @@ class VersionCacher {
         }
         return {stable, beta}
     }
-    versionsSince(release, beta) {
-        let watching = false
-        const betaSince = []
-        const stableSince = []
-        let versionsSorted = []
-        for (const r of this.versions) {
-            versionsSorted.push(r)
-        }
-        versionsSorted = versionsSorted.sort((a, b) => {
-            return a.release_id - b.release_id
-        })
-        for (const r of versionsSorted) {
-            if (watching) {
-                if (r.beta) {
-                    if (beta) betaSince.push(r)
-                } else {
-                    stableSince.push(r)
-                }
-            } else if (release === r.id) {
-                watching = true
-            }
-        }
-        const latest = this.getLatest()
-        return watching ? {betaSince, stableSince, latest: beta ? latest.beta : latest.stable} : null
-    }
 }
 
 module.exports = new VersionCacher()
