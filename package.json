@@ -24,7 +24,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "rethinkdbdash": "^2.3.31",
     "uuid": "^3.3.2"
   }
